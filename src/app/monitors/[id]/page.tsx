@@ -2,10 +2,12 @@
 
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import {Status} from "@/constants/index";
 import { StatusBadge } from '@/components/StatusBadge';
 import { EventEditModal } from '@/components/EventEditModal';
 import type { MonitorDetail, EventItem} from "../../../types";
 import {ExportEventsButton} from "@/components/ExportEventsButton";
+import EventsBar from '@/components/EventsBar';
 
 export default function MonitorDetailPage() {
     const { id } = useParams() as { id: string };
@@ -26,6 +28,7 @@ export default function MonitorDetailPage() {
         setIsModalOpen(true);
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handleSave = async (data: any) => {
         if (!selectedEvent?.id) return;
         try {
@@ -42,6 +45,14 @@ export default function MonitorDetailPage() {
 
     if (!monitor) return <p>Loading monitor...</p>;
 
+    function getStatusFromMonitor(monitor: MonitorDetail): Status {
+        if (monitor.isUp !== null && monitor.isUp !== undefined) {
+            return monitor.isActive ? monitor.isUp ? 'Functional' : 'Down' : 'Paused';
+        } else {
+            return 'Unknown';
+        }
+    }   
+
     return (
         <div className="p-6 text-white">
             <h1 className="text-2xl font-bold mb-2">{monitor.name}</h1>
@@ -56,7 +67,7 @@ export default function MonitorDetailPage() {
 
             <div className="flex items-center gap-2 mb-4">
                 <span className="text-lg">Current Status:</span>
-                <StatusBadge status={monitor.isUp ? 'Functional' : 'Down'} />
+                <StatusBadge status={getStatusFromMonitor(monitor)} />
             </div>
 
             <div className="flex items-center gap-2 mb-4">
@@ -79,6 +90,8 @@ export default function MonitorDetailPage() {
                     <p className="text-xl font-bold">{monitor.uptime30dPercentage}</p>
                 </div>
             </div>
+                
+            <EventsBar events={monitor.lastEvents} interval={monitor.intervalInMinutes} />
 
             <table className="w-full text-sm border border-zinc-700 bg-zinc-900">
                 <thead>
@@ -92,7 +105,7 @@ export default function MonitorDetailPage() {
                 </tr>
                 </thead>
                 <tbody>
-                {monitor.lastEvents.map(event => (
+                {monitor.lastImportantEvents.map(event => (
                     <tr key={event.id} className="hover:bg-zinc-700/30">
                         <td className="border border-zinc-700 p-2">
                             <StatusBadge status={event.isUp ? 'Functional' : 'Down'} />

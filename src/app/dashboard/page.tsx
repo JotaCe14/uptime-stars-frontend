@@ -18,7 +18,7 @@ const defaultStats = {
 };
 
 export default function DashboardPage() {
-    const [page, setPage] = useState(1);
+    const [page] = useState(1);
     const { data, isLoading, isError } = useMonitors(page, 100);
     const { stats, isLoading: statsLoading, isError: statsError } = useMonitorStats();
 

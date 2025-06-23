@@ -4,7 +4,11 @@ import {Status} from "@/constants/index";
 
 export default function MonitorCard({ monitor }: { monitor: MonitorDto }) {
     function getStatusFromMonitor(monitor: MonitorDto): Status {
-        return monitor.isActive ? 'Functional' : 'Down';
+        if (monitor.isUp !== null && monitor.isUp !== undefined) {
+            return monitor.isActive ? monitor.isUp ? 'Functional' : 'Down' : 'Paused';
+        } else {
+            return 'Unknown';
+        }
     }
     return (
         <a href={`/monitors/${monitor.id}`} className="flex items-center justify-between p-4 bg-white rounded shadow">

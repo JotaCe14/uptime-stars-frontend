@@ -64,9 +64,11 @@ export interface MonitorDetail {
     name: string;
     description: string;
     target: string;
-    isUp: boolean;
+    isUp?: boolean | null;
+    isActive: boolean;
     intervalInMinutes: number;
     uptime24hPercentage: string;
     uptime30dPercentage: string;
     lastEvents: EventItem[];
+    lastImportantEvents: EventItem[];
 }

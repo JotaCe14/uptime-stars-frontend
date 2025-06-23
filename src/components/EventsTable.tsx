@@ -23,7 +23,7 @@ export default function EventsTable() {
     const monitors = data.data;
 
     const allEvents: EventItem[] = monitors.flatMap(monitor =>
-        monitor.lastEvents.map((event, index) => ({
+        monitor.lastImportantEvents.map((event, index) => ({
             id: event.id ?? `${monitor.id}-${index}`,
             name: monitor.name,
             monitorId: monitor.id,

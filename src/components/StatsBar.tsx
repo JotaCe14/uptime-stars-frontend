@@ -22,10 +22,9 @@ export const StatsBar = ({ stats }: StatsBarProps) => {
 
         const timer = setInterval(() => {
             step++;
-            setAnimatedStats(prev =>
+            setAnimatedStats(() =>
                 Object.fromEntries(
                     Object.entries(stats).map(([key, target]) => {
-                        const current = prev[key as StatusKey] ?? 0;
                         const next = Math.round((target / steps) * step);
                         return [key, Math.min(next, target)];
                     })

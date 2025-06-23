@@ -31,7 +31,7 @@ export default function ReportPage() {
                 </tbody>
             </table>
             <div className="mt-4">
-                <ExportButton data={mockEvents} />
+                <ExportButton/>
             </div>
         </div>
     );

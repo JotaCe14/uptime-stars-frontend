@@ -4,7 +4,9 @@ import { useState } from 'react';
 interface Props {
     isOpen: boolean;
     onClose: () => void;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onSave: (data: any) => void;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     defaultValues?: any;
 }
 
@@ -17,8 +19,19 @@ export const EventEditModal = ({ isOpen, onClose, onSave, defaultValues }: Props
     });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-        const { name, value, type, checked } = e.target;
-        setForm(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+        const { name, value, type } = e.target;
+        if (type === 'checkbox') {
+            // Solo HTMLInputElement tiene checked
+            setForm(prev => ({
+                ...prev,
+                [name]: (e.target as HTMLInputElement).checked,
+            }));
+        } else {
+            setForm(prev => ({
+                ...prev,
+                [name]: value,
+            }));
+        }
     };
 
     const handleSubmit = (e: React.FormEvent) => {

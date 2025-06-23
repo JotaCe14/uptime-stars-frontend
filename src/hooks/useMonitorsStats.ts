@@ -16,25 +16,13 @@ export function useMonitorStats() {
 
     if (data?.data) {
         for (const monitor of data.data) {
-            const last = monitor.lastEvents?.[0];
-            if (!last) {
-                stats.Unknown++;
-                continue;
-            }
-
             if (monitor.isActive === false) {
                 stats.Paused++;
                 continue;
             }
-
-            if (last.maintenanceType) {
-                stats.Maintenance++;
-                continue;
-            }
-
-            if (last.isUp === true) {
+            if (monitor.isUp === true) {
                 stats.Functional++;
-            } else if (last.isUp === false) {
+            } else if (monitor.isUp === false) {
                 stats.Down++;
             } else {
                 stats.Unknown++;
