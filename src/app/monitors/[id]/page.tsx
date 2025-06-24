@@ -19,7 +19,7 @@ export default function MonitorDetailPage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     // Importa los métodos de acción
-    const { enableMonitor, disableMonitor, deleteMonitor, isActionLoading } = useMonitors(1, 100);
+    const { enableMonitor, disableMonitor, deleteMonitor, isActionLoading } = useMonitors(1, 20);
 
     useEffect(() => {
         if (!id) return;

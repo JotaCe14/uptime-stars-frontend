@@ -8,8 +8,15 @@ interface EventsBarProps {
 
 const EventsBar: React.FC<EventsBarProps> = ({ events, interval }) => {
  
- const lastEvents = (events?.slice(-20) || []).reverse();
- const emptyCount = 20 - lastEvents.length;
+ const lastEvents = (events || []).slice(0, 20).reverse();
+
+ console.log("Last events:", lastEvents);
+
+ var emptyCount = 0;
+
+ if (lastEvents.length < 20) {
+    emptyCount = 20 - lastEvents.length;
+ }
 
  return (
     <div className="w-full bg-zinc-900 rounded-lg p-6 flex flex-col gap-2">
