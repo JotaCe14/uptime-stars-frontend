@@ -13,9 +13,10 @@ interface Props {
 export const EventEditModal = ({ isOpen, onClose, onSave, defaultValues }: Props) => {
     const [form, setForm] = useState({
         falsePositive: defaultValues?.falsePositive || false,
-        category: defaultValues?.category || '',
+        category: defaultValues?.category || null,
         note: defaultValues?.note || '',
-        maintenanceType: defaultValues?.maintenanceType || '',
+        maintenanceType: defaultValues?.maintenanceType || null,
+        ticketId: defaultValues?.ticketId || '',
     });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -77,16 +78,16 @@ export const EventEditModal = ({ isOpen, onClose, onSave, defaultValues }: Props
                         />
                     </div>
 
-                    {/*<div>*/}
-                    {/*    <label className="block">Ticket code</label>*/}
-                    {/*    <input*/}
-                    {/*        type="text"*/}
-                    {/*        name="ticketCode"*/}
-                    {/*        value={form.ticketCode}*/}
-                    {/*        onChange={handleChange}*/}
-                    {/*        className="w-full border rounded p-2"*/}
-                    {/*    />*/}
-                    {/*</div>*/}
+                    <div>
+                        <label className="block">Ticket code</label>
+                        <input
+                            type="text"
+                            name="ticketId"
+                            value={form.ticketId}
+                            onChange={handleChange}
+                            className="w-full border rounded p-2"
+                        />
+                    </div>
 
                     <div>
                         <label className="block">Maintenance type</label>
