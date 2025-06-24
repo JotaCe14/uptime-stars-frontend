@@ -1,0 +1,78 @@
+trigger:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  - group: SonarCloudSecrets             # 🔒 Solo contiene SONAR_TOKEN
+
+  - name: dockerImageName
+    value: 'ci-node-app'
+  - name: dockerTag
+    value: 'ci-$(Build.BuildId)'
+
+steps:
+  # ✅ Mostrar rama actual
+  - script: |
+      echo "✅ Ejecutando en rama: $(Build.SourceBranch)"
+    displayName: 'Mostrar rama actual'
+
+  # 🔍 Diagnóstico inicial
+  - script: |
+      echo "🔍 Verificando entorno"
+      docker --version
+      node --version
+      npm --version
+    displayName: 'Diagnóstico inicial'
+
+  # 🟦 Instalar Sonar Scanner
+  - script: |
+      npm install -g sonar-scanner
+    displayName: '🟦 Instalar sonar-scanner'
+
+  # 🟦 Ejecutar análisis SonarCloud (mezcla de pipeline + library)
+  - script: |
+      sonar-scanner \
+        -Dsonar.projectKey=$(SONAR_PROJECT_KEY) \
+        -Dsonar.organization=$(SONAR_ORGANIZATION) \
+        -Dsonar.host.url=https://sonarcloud.io \
+        -Dsonar.sources=. \
+        -Dsonar.exclusions=node_modules/**,**/*.test.js,**/__tests__/** \
+        -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
+        -Dsonar.login="${SONAR_TOKEN}"
+    displayName: '🟦 Análisis de calidad SonarCloud'
+    env:
+      SONAR_TOKEN: $(SONAR_TOKEN)
+
+  # 🐳 Construir imagen Docker
+  - task: Docker@2
+    displayName: '🐳 Build imagen Docker'
+    inputs:
+      command: 'build'
+      repository: '$(dockerImageName)'
+      dockerfile: '**/Dockerfile'
+      tags: |
+        $(dockerTag)
+
+  # 🧪 Ejecutar pruebas dentro del contenedor
+  - script: |
+      docker run --rm $(dockerImageName):$(dockerTag) npm test
+    displayName: '🧪 Ejecutar pruebas en contenedor'
+
+  # 📈 Publicar cobertura (opcional si se genera accesible fuera)
+  - task: PublishCodeCoverageResults@2
+    condition: succeededOrFailed()
+    displayName: '📈 Publicar cobertura (si aplica)'
+    inputs:
+      codeCoverageTool: 'Cobertura'
+      summaryFileLocation: 'coverage/cobertura-coverage.xml'
+
+  # 📄 Mostrar logs si falla
+  - script: |
+      docker ps -a
+      docker logs $(docker ps -aqf "ancestor=$(dockerImageName):$(dockerTag)" || true)
+    displayName: '📄 Mostrar logs del contenedor'
+    condition: failed()
