@@ -18,7 +18,7 @@ export default function EventsTable() {
     const [pageNumber, setPageNumber] = useState(1);
     const [pageSize, setPageSize] = useState(100);
     const [selectedMonitorId, setSelectedMonitorId] = useState<string | null>(null);
-    const { data, isLoading, isError } = useEvents(pageNumber, pageSize, selectedMonitorId);
+    const { data, isLoading, isError } = useEvents(pageNumber, pageSize, selectedMonitorId, { refetchInterval: 5000 });
 
     if (isLoading) return <p>Loading recent events...</p>;
     if (isError || !data) return <p className="text-red-500">Failed to load events</p>;

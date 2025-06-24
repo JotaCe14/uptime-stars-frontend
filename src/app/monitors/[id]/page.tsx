@@ -10,6 +10,7 @@ import { ExportEventsButton } from "@/components/ExportEventsButton";
 import EventsBar from '@/components/EventsBar';
 import { useGroups } from '@/hooks/useGroups';
 import { useMonitors } from '@/hooks/useMonitors';
+import { useEvents } from '@/hooks/useEvents';
 
 export default function MonitorDetailPage() {
     const { id } = useParams() as { id: string };
@@ -18,7 +19,11 @@ export default function MonitorDetailPage() {
     const [selectedEvent, setSelectedEvent] = useState<EventItem | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    // Importa los métodos de acción
+    const [pageNumber, setPageNumber] = useState(1);
+    const [pageSize, setPageSize] = useState(20);
+
+    const { data: eventsData, isLoading: eventsLoading, isError: eventsError } = useEvents(pageNumber, pageSize, id, { refetchInterval: 30000 });
+
     const { enableMonitor, disableMonitor, deleteMonitor, isActionLoading } = useMonitors(1, 20);
 
     useEffect(() => {
@@ -36,6 +41,7 @@ export default function MonitorDetailPage() {
         };
 
         fetchMonitor();
+
         const interval = setInterval(fetchMonitor, 5000);
 
         return () => {
@@ -212,45 +218,90 @@ export default function MonitorDetailPage() {
 
             <EventsBar events={monitor.lastEvents} interval={monitor.intervalInMinutes} />
 
-            <table className="w-full text-sm border border-zinc-700 bg-zinc-900">
-                <thead>
-                <tr className="text-zinc-300 bg-zinc-800">
-                    <th className="border border-zinc-700 p-2">Status</th>
-                    <th className="border border-zinc-700 p-2">Date</th>
-                    <th className="border border-zinc-700 p-2">Message</th>
-                    <th className="border border-zinc-700 p-2">FalsePositive</th>
-                    <th className="border border-zinc-700 p-2">Note</th>
-                    <th className="border border-zinc-700 p-2">Category</th>
-                    <th className="border border-zinc-700 p-2">MaintenanceType</th>
-                    <th className="border border-zinc-700 p-2">Ticket</th>
-                    <th className="border border-zinc-700 p-2">Action</th>
-                </tr>
-                </thead>
-                <tbody>
-                {monitor.lastImportantEvents.map(event => (
-                    <tr key={event.id} className="hover:bg-zinc-700/30">
-                        <td className="border border-zinc-700 p-2">
-                            <StatusBadge status={event.isUp ? 'Functional' : 'Down'} />
-                        </td>
-                        <td className="border border-zinc-700 p-2">{event.timestampUtc}</td>
-                        <td className="border border-zinc-700 p-2">{event.message || '-'}</td>
-                        <td className="border border-zinc-700 p-2">{event.falsePositive ? "Yes": "No"}</td>
-                        <td className="border border-zinc-700 p-2">{event.note || '-'}</td>
-                        <td className="border border-zinc-700 p-2">{event.category || '-'}</td>
-                        <td className="border border-zinc-700 p-2">{event.maintenanceType || '-'}</td>
-                        <td className="border border-zinc-700 p-2">{event.ticketId || '-'}</td>
-                        <td className="border border-zinc-700 p-2">
+            {eventsLoading ? (
+                <p>Loading important events...</p>
+            ) : eventsError || !eventsData ? (
+                <p className="text-red-500">Failed to load important events</p>
+            ) : (
+                <>
+                    <div className="overflow-auto max-h-[600px]">
+                        <table className="w-full text-sm border border-zinc-700 bg-zinc-900">
+                            <thead>
+                            <tr className="text-zinc-300 bg-zinc-800">
+                                <th className="border border-zinc-700 p-2">Status</th>
+                                <th className="border border-zinc-700 p-2">Date</th>
+                                <th className="border border-zinc-700 p-2">Message</th>
+                                <th className="border border-zinc-700 p-2">FalsePositive</th>
+                                <th className="border border-zinc-700 p-2">Note</th>
+                                <th className="border border-zinc-700 p-2">Category</th>
+                                <th className="border border-zinc-700 p-2">MaintenanceType</th>
+                                <th className="border border-zinc-700 p-2">Ticket</th>
+                                <th className="border border-zinc-700 p-2">Action</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {eventsData.data.map(event => (
+                                <tr key={event.id} className="hover:bg-zinc-700/30">
+                                    <td className="border border-zinc-700 p-2">
+                                        <StatusBadge status={event.isUp ? 'Functional' : 'Down'} />
+                                    </td>
+                                    <td className="border border-zinc-700 p-2">{event.timestampUtc}</td>
+                                    <td className="border border-zinc-700 p-2">{event.message || '-'}</td>
+                                    <td className="border border-zinc-700 p-2">{event.falsePositive ? "Yes": "No"}</td>
+                                    <td className="border border-zinc-700 p-2">{event.note || '-'}</td>
+                                    <td className="border border-zinc-700 p-2">{event.category || '-'}</td>
+                                    <td className="border border-zinc-700 p-2">{event.maintenanceType || '-'}</td>
+                                    <td className="border border-zinc-700 p-2">{event.ticketId || '-'}</td>
+                                    <td className="border border-zinc-700 p-2">
+                                        <button
+                                            onClick={() => handleEditClick(event)}
+                                            className="text-xs text-yellow-400 border border-yellow-400 rounded px-2 py-0.5"
+                                        >
+                                            Edit
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div className="flex items-center justify-between mt-4">
+                        <div>
+                            Page {eventsData.pageNumber} of {eventsData.pageCount} ({eventsData.totalItemCount} events)
+                        </div>
+                        <div className="flex gap-2">
                             <button
-                                onClick={() => handleEditClick(event)}
-                                className="text-xs text-yellow-400 border border-yellow-400 rounded px-2 py-0.5"
+                                onClick={() => setPageNumber((prev) => Math.max(1, prev - 1))}
+                                disabled={pageNumber <= 1}
+                                className="px-3 py-1 rounded bg-zinc-700 text-grey-500 disabled:opacity-50"
                             >
-                                Edit
+                                Previous
                             </button>
-                        </td>
-                    </tr>
-                ))}
-                </tbody>
-            </table>
+                            <button
+                                onClick={() => setPageNumber((prev) => Math.min(eventsData.pageCount, prev + 1))}
+                                disabled={pageNumber >= eventsData.pageCount}
+                                className="px-3 py-1 rounded bg-zinc-700 text-grey-500 disabled:opacity-50"
+                            >
+                                Next
+                            </button>
+                        </div>
+                        <div>
+                            <select
+                                value={pageSize}
+                                onChange={e => {
+                                    setPageSize(Number(e.target.value));
+                                    setPageNumber(1);
+                                }}
+                                className="text-grey-500 px-2 py-1 rounded"
+                            >
+                                {[10, 20, 50, 100].map(size => (
+                                    <option className='text-black' key={size} value={size}>{size} per page</option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+                </>
+            )}
 
             {selectedEvent && (
                 <EventEditModal
