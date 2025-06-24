@@ -1,10 +1,18 @@
 export interface CreateMonitorPayload {
+    id?: string | null;
     name: string;
     type: 0 | 1;
     target: string;
     intervalInMinutes: number;
     tiemoutInMilliseconds: number;
     alertEmails: string[];
+    groupId?: string | null;
+    requestHeaders?: string[];
+    searchMode: 0 | 1;
+    expectedText: string | null;
+    alertMessage: string | null;
+    alertDelayMinutes: number;
+    alertResendCycles: number;
 }
 
 export interface MonitorEvent {
@@ -28,6 +36,7 @@ export interface MonitorDto {
     createdAtUtc: string;
     isActive: boolean;
     isUp?: boolean | null;
+    groupId?: string | null;
     lastImportantEvents: MonitorEvent[];
     uptime24hPercentage: string;
     uptime30dPercentage: string;
@@ -72,4 +81,31 @@ export async function createMonitor(payload: CreateMonitorPayload): Promise<stri
     }
 
     return await res.json();
+}
+
+export async function enableMonitor(monitorId: string): Promise<void> {
+    const res = await fetch(`/api/monitor/enable/${monitorId}`, {
+        method: 'POST',
+    });
+    if (!res.ok) {
+        throw new Error(`Error enabling monitor: ${res.statusText}`);
+    }
+}
+
+export async function disableMonitor(monitorId: string): Promise<void> {
+    const res = await fetch(`/api/monitor/disable/${monitorId}`, {
+        method: 'POST',
+    });
+    if (!res.ok) {
+        throw new Error(`Error disabling monitor: ${res.statusText}`);
+    }
+}
+
+export async function deleteMonitor(monitorId: string): Promise<void> {
+    const res = await fetch(`/api/monitor/${monitorId}`, {
+        method: 'DELETE',
+    });
+    if (!res.ok) {
+        throw new Error(`Error deleting monitor: ${res.statusText}`);
+    }
 }

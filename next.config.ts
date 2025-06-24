@@ -15,6 +15,14 @@ const nextConfig: NextConfig = {
                 source: '/api/event/:path',
                 destination: 'https://uptime-stars-backend-api-production.up.railway.app/api/v1/event/:path*',
             },
+            {
+                source: '/api/group',
+                destination: 'https://uptime-stars-backend-api-production.up.railway.app/api/v1/group',
+            },
+            {
+                source: '/api/group/:path',
+                destination: 'https://uptime-stars-backend-api-production.up.railway.app/api/v1/group/:path*',
+            },
         ];
     },
 };

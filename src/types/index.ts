@@ -65,6 +65,7 @@ export interface MonitorDetail {
     description: string;
     target: string;
     isUp?: boolean | null;
+    groupId?: string | null;
     isActive: boolean;
     intervalInMinutes: number;
     uptime24hPercentage: string;
