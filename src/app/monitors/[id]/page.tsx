@@ -36,7 +36,7 @@ export default function MonitorDetailPage() {
         };
 
         fetchMonitor();
-        const interval = setInterval(fetchMonitor, 30000);
+        const interval = setInterval(fetchMonitor, 5000);
 
         return () => {
             isMounted = false;
@@ -143,7 +143,7 @@ export default function MonitorDetailPage() {
                     }}
                     className={`px-4 py-2 rounded font-semibold flex items-center gap-2 shadow ${
                         monitor.isActive
-                            ? "bg-yellow-500 hover:bg-yellow-600 text-white"
+                            ? "bg-purple-500 hover:bg-purple-600 text-white"
                             : "bg-green-500 hover:bg-green-600 text-white"
                     }`}
                     disabled={isActionLoading}
@@ -169,7 +169,7 @@ export default function MonitorDetailPage() {
                 </button>
                 <button
                     onClick={handleUpdate}
-                    className="px-4 py-2 rounded font-semibold flex items-center gap-2 bg-purple-500 hover:bg-purple-600 text-white shadow"
+                    className="px-4 py-2 rounded font-semibold flex items-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-white shadow"
                 >
                     {/* Pencil Icon */}
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

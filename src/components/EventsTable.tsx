@@ -37,10 +37,6 @@ export default function EventsTable() {
         ? allEvents.filter(e => e.monitorId === selectedMonitorId)
         : allEvents;
 
-    const sortedEvents = filteredEvents.slice().sort((a, b) => 
-        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-    );
-
     return (
         <div className="bg-zinc-800 rounded-md p-4 shadow">
             <div className="flex justify-between items-center mb-4">
@@ -65,7 +61,7 @@ export default function EventsTable() {
                     </tr>
                     </thead>
                     <tbody>
-                    {sortedEvents.map(event => (
+                    {filteredEvents.map(event => (
                         <tr
                             key={event.id}
                             className="border-b border-zinc-700 hover:bg-zinc-700/30 cursor-pointer"
