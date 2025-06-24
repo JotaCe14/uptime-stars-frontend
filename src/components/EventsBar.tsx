@@ -12,7 +12,7 @@ const EventsBar: React.FC<EventsBarProps> = ({ events, interval }) => {
 
  console.log("Last events:", lastEvents);
 
- var emptyCount = 0;
+ let emptyCount = 0;
 
  if (lastEvents.length < 20) {
     emptyCount = 20 - lastEvents.length;
