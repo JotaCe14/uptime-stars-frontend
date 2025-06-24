@@ -1,31 +1,33 @@
 import type { NextConfig } from "next";
 
+const API_BASE_URL = process.env.API_BASE_URL || "https://localhost/api/v1";
+
 const nextConfig: NextConfig = {
     async rewrites() {
         return [
             {
                 source: '/api/monitor/:path*',
-                destination: 'https://uptime-stars-backend-api-production.up.railway.app/api/v1/monitor/:path*',
+                destination: `${API_BASE_URL}/monitor/:path*`,
             },
             {
                 source: '/api/monitor',
-                destination: 'https://uptime-stars-backend-api-production.up.railway.app/api/v1/monitor',
+                destination: `${API_BASE_URL}/monitor`,
             },
             {
                 source: '/api/event',
-                destination: 'https://uptime-stars-backend-api-production.up.railway.app/api/v1/event',
+                destination: `${API_BASE_URL}/event`,
             },
             {
                 source: '/api/event/:path',
-                destination: 'https://uptime-stars-backend-api-production.up.railway.app/api/v1/event/:path*',
+                destination: `${API_BASE_URL}/event/:path*`,
             },
             {
                 source: '/api/group',
-                destination: 'https://uptime-stars-backend-api-production.up.railway.app/api/v1/group',
+                destination: `${API_BASE_URL}/group`,
             },
             {
                 source: '/api/group/:path',
-                destination: 'https://uptime-stars-backend-api-production.up.railway.app/api/v1/group/:path*',
+                destination: `${API_BASE_URL}/group/:path*`,
             },
         ];
     },
