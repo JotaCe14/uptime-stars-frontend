@@ -37,7 +37,6 @@ export interface MonitorDto {
     isActive: boolean;
     isUp?: boolean | null;
     groupId?: string | null;
-    lastImportantEvents: MonitorEvent[];
     uptime24hPercentage: string;
     uptime30dPercentage: string;
 }

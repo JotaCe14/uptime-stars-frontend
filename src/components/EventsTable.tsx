@@ -1,6 +1,6 @@
 'use client';
 
-import { useMonitors } from '@/hooks/useMonitors';
+import { useEvents } from '@/hooks/useEvents';
 import { useState } from 'react';
 import { StatusBadge } from './StatusBadge';
 
@@ -14,28 +14,26 @@ interface EventItem {
 }
 
 export default function EventsTable() {
+    
+    const [pageNumber, setPageNumber] = useState(1);
+    const [pageSize, setPageSize] = useState(100);
     const [selectedMonitorId, setSelectedMonitorId] = useState<string | null>(null);
-    const { data, isLoading, isError } = useMonitors(1, 100, 10);
+    const { data, isLoading, isError } = useEvents(pageNumber, pageSize, selectedMonitorId);
 
     if (isLoading) return <p>Loading recent events...</p>;
     if (isError || !data) return <p className="text-red-500">Failed to load events</p>;
 
-    const monitors = data.data;
+    const totalPages = data?.pageCount ?? 1;
+    const totalItems = data?.totalItemCount ?? 0;
 
-    const allEvents: EventItem[] = monitors.flatMap(monitor =>
-        monitor.lastImportantEvents.map((event, index) => ({
-            id: event.id ?? `${monitor.id}-${index}`,
-            name: monitor.name,
-            monitorId: monitor.id,
-            status: event.isUp ? 'Functional' : 'Down',
-            timestamp: event.timestampUtc,
-            message: event.message || 'No message',
-        }))
-    );
-
-    const filteredEvents = selectedMonitorId
-        ? allEvents.filter(e => e.monitorId === selectedMonitorId)
-        : allEvents;
+    const allEvents: EventItem[] = data.data.map(event => ({
+        id: event.id,
+        name: event.monitorName || "",
+        monitorId: event.monitorId,
+        status: event.isUp ? 'Functional' : 'Down',
+        timestamp: event.timestampUtc,
+        message: event.message || 'No message',
+    }));
 
     return (
         <div className="bg-zinc-800 rounded-md p-4 shadow">
@@ -61,7 +59,7 @@ export default function EventsTable() {
                     </tr>
                     </thead>
                     <tbody>
-                    {filteredEvents.map(event => (
+                    {allEvents.map(event => (
                         <tr
                             key={event.id}
                             className="border-b border-zinc-700 hover:bg-zinc-700/30 cursor-pointer"
@@ -77,6 +75,41 @@ export default function EventsTable() {
                     ))}
                     </tbody>
                 </table>
+            </div>
+            <div className="flex items-center justify-between mt-4">
+                <div>
+                    Page {data.pageNumber} of {totalPages} (Total Pages: {totalItems})
+                </div>
+                <div className="flex gap-2">
+                    <button
+                        onClick={() => setPageNumber((prev) => Math.max(1, prev - 1))}
+                        disabled={pageNumber <= 1}
+                        className="px-3 py-1 rounded bg-zinc-700 text-grey-500 disabled:opacity-50"
+                    >
+                        Previous
+                    </button>
+                    <button
+                        onClick={() => setPageNumber((prev) => Math.min(totalPages, prev + 1))}
+                        disabled={pageNumber >= totalPages}
+                        className="px-3 py-1 rounded bg-zinc-700 text-grey-500 disabled:opacity-50"
+                    >
+                        Next
+                    </button>
+                </div>
+                <div>
+                    <select
+                        value={pageSize}
+                        onChange={e => {
+                            setPageSize(Number(e.target.value));
+                            setPageNumber(1);
+                        }}
+                        className="text-grey-500 px-2 py-1 rounded"
+                    >
+                        {[10, 20, 50, 100].map(size => (
+                            <option className="text-black" key={size} value={size}>{size} per page</option>
+                        ))}
+                    </select>
+                </div>
             </div>
         </div>
     );
